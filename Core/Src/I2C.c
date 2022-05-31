@@ -5,15 +5,6 @@
 #include "main.h"
 extern I2C_HandleTypeDef hi2c1;
 
-#define SCCB_READ 1
-
-static uint16_t VIS_ADDRESS = 0x3C;
-static uint16_t NIR_ADDRESS = 0x3E;
-
-
-
-
-
 uint16_t i2c1_read8_16(uint8_t addr, uint8_t register_pointer){
 	uint16_t val = hi2c_read8_16(hi2c1, addr, register_pointer);
 	return val;
