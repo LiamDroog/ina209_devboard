@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "debug.h"
+#include "command.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -107,6 +108,16 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+  uint8_t state;
+
+  char cmd[64];
+  char buf[64];
+  char *ptr = cmd;
+
+  DBG_PUT("-----------------------------------\r\n");
+  DBG_PUT("        INA209 Test Software        \r\n");
+  DBG_PUT("-----------------------------------\r\n");
+
 
   /* USER CODE END 2 */
 
@@ -115,7 +126,51 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  state = idle;
+	  	   while (1)
+	  	   {
+	  		   switch (state){
+	  			   case idle:
+	  				   DBG_PUT("\r:>> ");
+	  				   state = receiving;
+	  				   break;
+	  			   case receiving:;
+	  				   HAL_StatusTypeDef rc = HAL_UART_Receive(&huart1, (uint8_t *) ptr, 1, 20000);
+	  			/* USER CODE END WHILE */
 
+	  			/* USER CODE BEGIN 3 */
+	  				   /* Build up the command one byte at a time */
+	  				   if (rc != HAL_OK) {
+	  					   if (rc != HAL_TIMEOUT) {
+	  						   sprintf(buf, "UART read error: %x\r\n", rc);
+	  						   DBG_PUT(buf);
+	  					   }
+	  					   continue;
+	  				   }
+	  				   /* Command is complete when we get EOL of some sort */
+	  				   if (*ptr == '\n' || *ptr == '\r') {
+	  					   *ptr = 0;
+	  					   DBG_PUT("\r\n");
+	  					   uart_handle_command(cmd);
+	  					   ptr = cmd;
+	  					   state = idle;
+
+	  				   }
+	  				   else {
+	  					   *(ptr + 1) = 0;
+	  					   DBG_PUT(ptr);
+
+	  					   if (*ptr == 0x7f) { // handle backspace
+	  						   if (ptr > cmd)
+	  							   --ptr;
+	  					   }
+	  					   else
+	  						   ++ptr;
+	  				   }
+	  				   break;
+	  			   }
+
+	  		   }
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
