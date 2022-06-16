@@ -11,7 +11,8 @@
 uint16_t get_configuration(uint8_t addr);
 void set_configuration(uint8_t addr, uint16_t val);
 uint16_t get_status_flags(uint8_t addr);
-uint16_t get_smbus_alert(uint8_t addr);
+uint16_t get_control_register(uint8_t addr);
+void set_control_register(uint8_t addr, uint16_t val);
 uint16_t get_shunt_voltage(uint8_t addr);
 uint16_t get_bus_voltage(uint8_t addr);
 uint16_t get_power(uint8_t addr);
@@ -29,6 +30,8 @@ uint16_t get_bus_voltage_underlimit(uint8_t addr);
 void set_bus_voltage_underlimit(uint8_t addr, uint16_t val);
 uint16_t get_calibration(uint8_t addr);
 void set_calibration(uint8_t addr, uint16_t val);
+void init_ina209(uint8_t addr);
+void reset_ina209(uint8_t addr);
 static inline uint16_t _flip_byte_order(uint16_t input){
 	// Data is transmitted MSB first, but STM is LSB.
 	// This flips the byte order.

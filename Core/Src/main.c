@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "debug.h"
 #include "command.h"
+#include "ina209.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +44,6 @@
  I2C_HandleTypeDef hi2c1;
 
 SPI_HandleTypeDef hspi1;
-SPI_HandleTypeDef hspi2;
 
 TSC_HandleTypeDef htsc;
 
@@ -60,7 +60,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_SPI2_Init(void);
 static void MX_TSC_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USB_PCD_Init(void);
@@ -103,7 +102,6 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
-  MX_SPI2_Init();
   MX_TSC_Init();
   MX_USART1_UART_Init();
   MX_USB_PCD_Init();
@@ -117,7 +115,7 @@ int main(void)
   DBG_PUT("-----------------------------------\r\n");
   DBG_PUT("        INA209 Test Software        \r\n");
   DBG_PUT("-----------------------------------\r\n");
-
+  init_ina209(INA209);
 
   /* USER CODE END 2 */
 
@@ -126,19 +124,18 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  state = idle;
-	  	   while (1)
-	  	   {
-	  		   switch (state){
-	  			   case idle:
-	  				   DBG_PUT("\r:>> ");
-	  				   state = receiving;
-	  				   break;
-	  			   case receiving:;
-	  				   HAL_StatusTypeDef rc = HAL_UART_Receive(&huart1, (uint8_t *) ptr, 1, 20000);
-	  			/* USER CODE END WHILE */
 
-	  			/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
+	  state = idle;
+	  	  	   while (1)
+	  	  	   {
+	  	  		   switch (state){
+	  	  			   case idle:
+	  	  				   DBG_PUT("\r:>> ");
+	  	  				   state = receiving;
+	  	  				   break;
+	  	  			   case receiving:;
+	  	  				   HAL_StatusTypeDef rc = HAL_UART_Receive(&huart1, (uint8_t *) ptr, 1, 20000);
 	  				   /* Build up the command one byte at a time */
 	  				   if (rc != HAL_OK) {
 	  					   if (rc != HAL_TIMEOUT) {
@@ -316,44 +313,6 @@ static void MX_SPI1_Init(void)
 }
 
 /**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI2_Init(void)
-{
-
-  /* USER CODE BEGIN SPI2_Init 0 */
-
-  /* USER CODE END SPI2_Init 0 */
-
-  /* USER CODE BEGIN SPI2_Init 1 */
-
-  /* USER CODE END SPI2_Init 1 */
-  /* SPI2 parameter configuration*/
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_HARD_INPUT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 7;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI2_Init 2 */
-
-  /* USER CODE END SPI2_Init 2 */
-
-}
-
-/**
   * @brief TSC Initialization Function
   * @param None
   * @retval None
@@ -383,9 +342,9 @@ static void MX_TSC_Init(void)
   htsc.Init.SynchroPinPolarity = TSC_SYNC_POLARITY_FALLING;
   htsc.Init.AcquisitionMode = TSC_ACQ_MODE_NORMAL;
   htsc.Init.MaxCountInterrupt = DISABLE;
-  htsc.Init.ChannelIOs = TSC_GROUP1_IO3|TSC_GROUP2_IO3|TSC_GROUP3_IO2;
+  htsc.Init.ChannelIOs = TSC_GROUP1_IO3;
   htsc.Init.ShieldIOs = 0;
-  htsc.Init.SamplingIOs = TSC_GROUP1_IO4|TSC_GROUP2_IO4|TSC_GROUP3_IO3;
+  htsc.Init.SamplingIOs = TSC_GROUP1_IO4;
   if (HAL_TSC_Init(&htsc) != HAL_OK)
   {
     Error_Handler();
@@ -482,7 +441,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LD_R_GPIO_Port, LD_R_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, ePD1_RESET_Pin|ePD1_PWR_ENn_Pin|ePD1_D_C_Pin|LD_G_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LD_G_GPIO_Port, LD_G_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : MFX_IRQ_OUT_Pin */
   GPIO_InitStruct.Pin = MFX_IRQ_OUT_Pin;
@@ -496,12 +455,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : MFX_WAKEUP_Pin ePD1_BUSY_Pin */
-  GPIO_InitStruct.Pin = MFX_WAKEUP_Pin|ePD1_BUSY_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /*Configure GPIO pin : LD_R_Pin */
   GPIO_InitStruct.Pin = LD_R_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -509,12 +462,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD_R_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : ePD1_RESET_Pin ePD1_PWR_ENn_Pin ePD1_D_C_Pin LD_G_Pin */
-  GPIO_InitStruct.Pin = ePD1_RESET_Pin|ePD1_PWR_ENn_Pin|ePD1_D_C_Pin|LD_G_Pin;
+  /*Configure GPIO pins : NFC_MISO_Pin NFC_MOSI_Pin */
+  GPIO_InitStruct.Pin = NFC_MISO_Pin|NFC_MOSI_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF0_SPI2;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ePD1_BUSY_Pin */
+  GPIO_InitStruct.Pin = ePD1_BUSY_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ePD1_BUSY_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LD_G_Pin */
+  GPIO_InitStruct.Pin = LD_G_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(LD_G_GPIO_Port, &GPIO_InitStruct);
 
 }
 

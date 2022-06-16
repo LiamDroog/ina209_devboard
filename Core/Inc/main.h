@@ -68,20 +68,8 @@ void Error_Handler(void);
 #define MCO_GPIO_Port GPIOH
 #define B1_Pin GPIO_PIN_0
 #define B1_GPIO_Port GPIOA
-#define MFX_WAKEUP_Pin GPIO_PIN_1
-#define MFX_WAKEUP_GPIO_Port GPIOA
 #define LD_R_Pin GPIO_PIN_5
 #define LD_R_GPIO_Port GPIOA
-#define ePD1_RESET_Pin GPIO_PIN_2
-#define ePD1_RESET_GPIO_Port GPIOB
-#define ePD1_PWR_ENn_Pin GPIO_PIN_10
-#define ePD1_PWR_ENn_GPIO_Port GPIOB
-#define ePD1_D_C_Pin GPIO_PIN_11
-#define ePD1_D_C_GPIO_Port GPIOB
-#define NFC_NSS_Pin GPIO_PIN_12
-#define NFC_NSS_GPIO_Port GPIOB
-#define NFC_SCK_Pin GPIO_PIN_13
-#define NFC_SCK_GPIO_Port GPIOB
 #define NFC_MISO_Pin GPIO_PIN_14
 #define NFC_MISO_GPIO_Port GPIOB
 #define NFC_MOSI_Pin GPIO_PIN_15
@@ -108,9 +96,9 @@ void Error_Handler(void);
 #define LD_G_GPIO_Port GPIOB
 #define ePD1_MOSI_Pin GPIO_PIN_5
 #define ePD1_MOSI_GPIO_Port GPIOB
-#define MFX_I2C_SCL_Pin GPIO_PIN_8
+#define MFX_I2C_SCL_Pin GPIO_PIN_6
 #define MFX_I2C_SCL_GPIO_Port GPIOB
-#define MFX_I2C_SDA_Pin GPIO_PIN_9
+#define MFX_I2C_SDA_Pin GPIO_PIN_7
 #define MFX_I2C_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 

@@ -8,7 +8,7 @@
 #include "command.h"
 #include "debug.h"
 #include "ina209.h"
-#include "i2c.h"
+#include "I2C.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -22,6 +22,10 @@ void uart_handle_command(char *cmd) {
                 }
         break;
 
+	case 'r':
+		reset_ina209(INA209);
+		DBG_PUT("INA209 Reset\r\n");
+		break;
     case 'h':
 		DBG_PUT("Help: \r\n");
 		break;
@@ -67,8 +71,8 @@ static void handle_i2c16_8_cmd(const char *cmd){
     case 'r':
         {
             uint16_t val;
-            val = i2c1_read8_16(INA209, reg);
-            sprintf(buf, "Device 0x%lx register 0x%lx = 0x%x\r\n", INA209, reg, val);
+            val = _flip_byte_order(i2c1_read8_16(INA209, reg));
+            sprintf(buf, "Device 0x%lx register 0x%lx = 0x%04x\r\n", INA209, reg, val);
         }
         break;
 
@@ -79,14 +83,17 @@ static void handle_i2c16_8_cmd(const char *cmd){
                 sprintf(buf, "reg write 0x%lx: missing reg value\r\n", reg);
                 break;
             }
-            uint16_t val;
+
+            long int val;
+            uint16_t writeval;
+
             if (sscanf(valptr, "%lx", &val) != 1) {
                 sprintf(buf, "reg write 0x%lx: bad val '%s'\r\n", reg, valptr);
                 break;
             }
-            i2c1_write8_16(INA209, reg, val);
+            i2c1_write8_16(INA209, reg, _flip_byte_order(val));
 
-            sprintf(buf, "Device 0x%lx register 0x%lx wrote 0x%02lx\r\n", INA209, reg, val);
+            sprintf(buf, "Device 0x%lx register 0x%lx wrote 0x%04lx\r\n", INA209, reg, val);
         }
         break;
     default:
